@@ -5,7 +5,7 @@ name: rust-tests
 on:
   push:
     branches:
-      - main
+      - master
       - 'feature-**'
 
 jobs:

@@ -2,4 +2,4 @@
 
 ## Disclaimer
 
-This crate do not intend to replace any other crates, it is only for educational purposes only.
+This crate do not intend to replace any other crates, it is for educational purposes only.
