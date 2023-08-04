@@ -36,7 +36,7 @@ impl Bytes {
 
     #[inline]
     pub fn get(&self, index: usize) -> u8 {
-        let offset = unsafe { &self.ptr.offset(index as isize) };
+        let offset = unsafe { &self.ptr.add(index) };
         unsafe { offset.read() }
     }
 }
