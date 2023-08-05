@@ -113,7 +113,7 @@ unsafe fn shared_clone(data: &AtomicPtr<()>, ptr: *const u8, len: usize) -> Byte
 }
 
 unsafe fn shared_drop(data: &mut AtomicPtr<()>, _: *const u8, _: usize) {
-    let shared: _ = data.get_mut().cast();
+    let shared: *mut Shared = data.get_mut().cast();
     release_shared(shared)
 }
 
