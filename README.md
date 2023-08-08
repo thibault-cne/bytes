@@ -4,7 +4,7 @@ This crate is strongly inspired from the tokio bytes crate. You can find it [her
 
 ## Motivation
 
-This crate is created has a utility tool for a web server. The idea is to create a web server in rust with no dependancies.
+This crate is created as a utility tool for a web server. The idea is to create a web server in rust with no dependancies.
 
 ## Disclaimer
 
