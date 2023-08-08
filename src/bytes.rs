@@ -1,8 +1,8 @@
-use std::slice;
-use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
+use core::mem;
+use core::slice;
+use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 
-use std::alloc::{dealloc, Layout};
-use std::mem;
+use alloc::alloc::{dealloc, Layout};
 
 pub struct Bytes {
     /// A pointer to the underlying data
@@ -42,6 +42,38 @@ impl Bytes {
             data: AtomicPtr::new(&mut ()),
             vtable: &STATIC_VTABLE,
         }
+    }
+
+    /// Return the len of the inner bytes buffer
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let bytes = Bytes::new();
+    ///
+    /// assert!(bytes.is_empty());
+    /// ```
+    #[inline]
+    pub const fn len(&self) -> usize {
+        self.len
+    }
+
+    /// Return true if the inner byte buffer is empty
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let bytes = Bytes::new();
+    ///
+    /// assert!(bytes.is_empty());
+    /// ```
+    #[inline]
+    pub const fn is_empty(&self) -> bool {
+        self.len == 0
     }
 
     pub fn get(&self, index: usize) -> u8 {
