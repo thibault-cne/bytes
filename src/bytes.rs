@@ -133,6 +133,26 @@ impl From<Box<[u8]>> for Bytes {
     }
 }
 
+impl From<String> for Bytes {
+    fn from(value: String) -> Self {
+        Bytes::from(value.as_bytes().to_vec())
+    }
+}
+
+impl From<&'static str> for Bytes {
+    #[inline]
+    fn from(value: &'static str) -> Self {
+        Bytes::from_static(value.as_bytes())
+    }
+}
+
+impl From<&'static [u8]> for Bytes {
+    #[inline]
+    fn from(value: &'static [u8]) -> Self {
+        Bytes::from_static(value)
+    }
+}
+
 // === Vtables ===
 // === Static vtable ===
 
