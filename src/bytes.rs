@@ -1,4 +1,5 @@
 use core::mem;
+use core::ops::RangeBounds;
 use core::slice;
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 
@@ -81,6 +82,80 @@ impl Bytes {
         let offset = unsafe { &self.ptr.add(index) };
         unsafe { offset.read() }
     }
+
+    /// Get a subslice of the `Bytes` object
+    /// This create a cloned `Bytes` object with the given subslice
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let bytes = Bytes::from_static(b"toto toto");
+    /// let slice = bytes.slice(..4);
+    ///
+    /// assert_eq!(slice.as_slice(), b"toto");
+    /// assert_eq!(bytes.as_slice(), b"toto toto");
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This panics if there is an invalid range given e.g if the start is superior to the end
+    /// or if the end is superior to the len of the `Bytes`
+    pub fn slice(&self, range: impl RangeBounds<usize>) -> Bytes {
+        use core::ops::Bound::*;
+
+        let len = self.len;
+
+        let start = match range.start_bound() {
+            Included(&start) => start + 1,
+            Excluded(&start) => start,
+            Unbounded => 0,
+        };
+        let end = match range.end_bound() {
+            Included(&end) => end + 1,
+            Excluded(&end) => end,
+            Unbounded => 0,
+        };
+
+        assert!(
+            start <= end,
+            "invalid bounds: start ({}) > end ({})",
+            start,
+            end
+        );
+
+        assert!(end <= len, "invalid bounds: end out of bounds ({})", end);
+
+        // If start == end we don't care about slicing the good ptr range
+        // we just return an empty value
+        if start == end {
+            return Bytes::new();
+        }
+
+        let mut slice = self.clone();
+
+        slice.len = end - start;
+        slice.ptr = unsafe { slice.ptr.add(start) };
+
+        slice
+    }
+
+    /// Retrive the inner bytes as a slice
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let bytes = Bytes::from_static(b"toto");
+    ///
+    /// assert_eq!(bytes.as_slice(), b"toto");
+    /// ```
+    #[inline]
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe { slice::from_raw_parts(self.ptr, self.len) }
+    }
 }
 
 impl Clone for Bytes {
@@ -99,6 +174,14 @@ impl Default for Bytes {
     #[inline]
     fn default() -> Bytes {
         Bytes::new()
+    }
+}
+
+// === PartialEq, PartialOrd and Eq
+
+impl PartialEq<[u8]> for Bytes {
+    fn eq(&self, other: &[u8]) -> bool {
+        self.as_slice() == other
     }
 }
 
