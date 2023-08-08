@@ -16,10 +16,10 @@ pub struct Bytes {
     cpt: AtomicPtr<()>,
 
     /// The virtual table to clone and drop this object
-    vtable: &'static VTable,
+    vtable: &'static Vtable,
 }
 
-pub struct VTable {
+pub struct Vtable {
     pub(crate) clone: unsafe fn(&AtomicPtr<()>, *const u8, usize) -> Bytes,
     pub(crate) drop: unsafe fn(&mut AtomicPtr<()>, *const u8, usize),
 }
@@ -27,6 +27,14 @@ pub struct VTable {
 // === Bytes ===
 
 impl Bytes {
+    const EMPTY: &[u8] = &[];
+
+    #[inline]
+    pub fn new() -> Bytes {
+        Bytes::from_static(Bytes::EMPTY)
+    }
+
+    #[inline]
     pub fn from_static(src: &'static [u8]) -> Bytes {
         Bytes {
             ptr: src.as_ptr(),
@@ -55,6 +63,15 @@ impl Drop for Bytes {
     }
 }
 
+impl Default for Bytes {
+    #[inline]
+    fn default() -> Bytes {
+        Bytes::new()
+    }
+}
+
+// === From ===
+
 impl From<Vec<u8>> for Bytes {
     fn from(value: Vec<u8>) -> Self {
         let mut value = value;
@@ -80,9 +97,9 @@ impl From<Vec<u8>> for Bytes {
     }
 }
 
-// === VTables ===
+// === Vtables ===
 
-pub static STATIC_VTABLE: VTable = VTable {
+pub static STATIC_VTABLE: Vtable = Vtable {
     clone: static_clone,
     drop: static_drop,
 };
@@ -102,7 +119,7 @@ unsafe fn static_drop(_: &mut AtomicPtr<()>, _: *const u8, _: usize) {
 // This is used to create a shared bytes object
 // from a vector or a boxed u8 slice
 
-static SHARED_VTABLE: VTable = VTable {
+static SHARED_VTABLE: Vtable = Vtable {
     clone: shared_clone,
     drop: shared_drop,
 };
