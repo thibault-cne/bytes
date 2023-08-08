@@ -82,7 +82,7 @@ impl From<Vec<u8>> for Bytes {
         let shared = Box::new(Shared {
             buf: ptr,
             cap,
-            ref_count: AtomicUsize::new(1),
+            ref_cnt: AtomicUsize::new(1),
         });
 
         mem::forget(value);
@@ -135,7 +135,7 @@ unsafe fn shared_drop(data: &mut AtomicPtr<()>, _: *const u8, _: usize) {
 }
 
 unsafe fn shallow_clone(shared: *mut Shared, ptr: *const u8, len: usize) -> Bytes {
-    (*shared).ref_count.fetch_add(1, Ordering::Release);
+    (*shared).ref_cnt.fetch_add(1, Ordering::Release);
 
     Bytes {
         ptr,
@@ -147,7 +147,7 @@ unsafe fn shallow_clone(shared: *mut Shared, ptr: *const u8, len: usize) -> Byte
 
 unsafe fn release_shared(shared: *mut Shared) {
     // If this is diffetent from 1 than we don't need to drop the value
-    if (*shared).ref_count.fetch_sub(1, Ordering::Release) != 1 {
+    if (*shared).ref_cnt.fetch_sub(1, Ordering::Release) != 1 {
         return;
     }
 
@@ -158,8 +158,11 @@ unsafe fn release_shared(shared: *mut Shared) {
 struct Shared {
     buf: *mut u8,
     cap: usize,
-    ref_count: AtomicUsize,
+    ref_cnt: AtomicUsize,
 }
+
+// Verify that the |Shared` struct size is divisible by 2 because we want to use the LSB has a flag.
+const _: [(); 0 - mem::size_of::<Shared>() % 2] = [];
 
 impl Drop for Shared {
     fn drop(&mut self) {
