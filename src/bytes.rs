@@ -179,9 +179,45 @@ impl Default for Bytes {
 
 // === PartialEq, PartialOrd and Eq
 
+// ** Bytes **
+
+impl PartialEq<Bytes> for Bytes {
+    fn eq(&self, other: &Bytes) -> bool {
+        self.as_slice() == other.as_slice()
+    }
+}
+
+impl PartialOrd<Bytes> for Bytes {
+    fn partial_cmp(&self, other: &Bytes) -> Option<std::cmp::Ordering> {
+        self.as_slice().partial_cmp(other.as_slice())
+    }
+}
+
+impl Eq for Bytes {}
+
+// ** [u8] **
+
 impl PartialEq<[u8]> for Bytes {
     fn eq(&self, other: &[u8]) -> bool {
         self.as_slice() == other
+    }
+}
+
+impl PartialOrd<[u8]> for Bytes {
+    fn partial_cmp(&self, other: &[u8]) -> Option<std::cmp::Ordering> {
+        self.as_slice().partial_cmp(other)
+    }
+}
+
+impl PartialEq<Bytes> for [u8] {
+    fn eq(&self, other: &Bytes) -> bool {
+        self == other.as_slice()
+    }
+}
+
+impl PartialOrd<Bytes> for [u8] {
+    fn partial_cmp(&self, other: &Bytes) -> Option<std::cmp::Ordering> {
+        self.partial_cmp(other.as_slice())
     }
 }
 
