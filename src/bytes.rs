@@ -50,8 +50,7 @@ impl Bytes {
     /// # Example
     ///
     /// ```
-    /// use bytes::Bytes;
-    ///
+    /// # use bytes::Bytes;
     /// let bytes = Bytes::new();
     ///
     /// assert!(bytes.is_empty());
@@ -66,8 +65,7 @@ impl Bytes {
     /// # Example
     ///
     /// ```
-    /// use bytes::Bytes;
-    ///
+    /// # use bytes::Bytes;
     /// let bytes = Bytes::new();
     ///
     /// assert!(bytes.is_empty());
@@ -77,8 +75,41 @@ impl Bytes {
         self.len == 0
     }
 
+    /// Retrieve the byte at the given index
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use bytes::Bytes;
+    /// let bytes = Bytes::from_static(b"toto");
+    ///
+    /// assert_eq!(bytes.get(1), b'o');
+    /// ```
+    ///
+    /// # Préconditions
+    ///
+    /// `index` <= `self.len()`
+    /// `index` >= 0
+    ///
+    /// # Panics
+    ///
+    /// If the preconditions are not met than this function will panic
+    ///
+    /// ```should_panic
+    /// # use bytes::Bytes;
+    /// let bytes = Bytes::new();
+    ///
+    /// bytes.get(1);
+    /// ```
     pub fn get(&self, index: usize) -> u8 {
-        // TODO: panic if index if greater than self.len
+        assert!(
+            (0..self.len).contains(&index),
+            "index out of bound: bound ({}..{}) don't contains index ({})",
+            0,
+            self.len,
+            index
+        );
+
         let offset = unsafe { &self.ptr.add(index) };
         unsafe { offset.read() }
     }
@@ -89,8 +120,7 @@ impl Bytes {
     /// # Example
     ///
     /// ```
-    /// use bytes::Bytes;
-    ///
+    /// # use bytes::Bytes;
     /// let bytes = Bytes::from_static(b"toto toto");
     /// let slice = bytes.slice(..4);
     ///
@@ -146,8 +176,7 @@ impl Bytes {
     /// # Example
     ///
     /// ```
-    /// use bytes::Bytes;
-    ///
+    /// # use bytes::Bytes;
     /// let bytes = Bytes::from_static(b"toto");
     ///
     /// assert_eq!(bytes.as_slice(), b"toto");
