@@ -6,6 +6,7 @@ use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 use alloc::{
     alloc::{dealloc, Layout},
     borrow::Borrow,
+    vec::Vec,
 };
 
 pub struct Bytes {
