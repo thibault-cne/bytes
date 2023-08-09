@@ -1,9 +1,12 @@
 use core::mem;
-use core::ops::RangeBounds;
+use core::ops::{Deref, RangeBounds};
 use core::slice;
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 
-use alloc::alloc::{dealloc, Layout};
+use alloc::{
+    alloc::{dealloc, Layout},
+    borrow::Borrow,
+};
 
 pub struct Bytes {
     /// A pointer to the underlying data
@@ -206,6 +209,37 @@ impl Default for Bytes {
     }
 }
 
+// === AsRef, Borrow and Deref
+
+impl Deref for Bytes {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        self.as_slice()
+    }
+}
+
+impl AsRef<[u8]> for Bytes {
+    fn as_ref(&self) -> &[u8] {
+        self.as_slice()
+    }
+}
+
+impl Borrow<[u8]> for Bytes {
+    fn borrow(&self) -> &[u8] {
+        self.as_slice()
+    }
+}
+
+impl<'a> IntoIterator for &'a Bytes {
+    type Item = &'a u8;
+    type IntoIter = slice::Iter<'a, u8>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.as_slice().iter()
+    }
+}
+
 // === PartialEq, PartialOrd and Eq
 
 // ** Bytes **
@@ -336,7 +370,7 @@ impl From<&'static [u8]> for Bytes {
 // === Vtables ===
 // === Static vtable ===
 
-pub static STATIC_VTABLE: Vtable = Vtable {
+static STATIC_VTABLE: Vtable = Vtable {
     clone: static_clone,
     drop: static_drop,
 };
@@ -513,7 +547,7 @@ unsafe fn release_shared(shared: *mut Shared) {
 
 unsafe fn free_boxed_slice(buf: *mut u8, offset: *const u8, len: usize) {
     let cap = (offset as usize - buf as usize) + len;
-    // FIXME:
+    // TODO:
     // Safety: ?value
     dealloc(buf, Layout::from_size_align_unchecked(cap, 1))
 }
