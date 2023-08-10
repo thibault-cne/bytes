@@ -1,7 +1,6 @@
-use core::mem;
 use core::ops::{Deref, RangeBounds};
-use core::slice;
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
+use core::{mem, ptr, slice};
 
 use alloc::{
     alloc::{dealloc, Layout},
@@ -40,11 +39,11 @@ impl Bytes {
     }
 
     #[inline]
-    pub fn from_static(src: &'static [u8]) -> Bytes {
+    pub const fn from_static(src: &'static [u8]) -> Bytes {
         Bytes {
             ptr: src.as_ptr(),
             len: src.len(),
-            data: AtomicPtr::new(&mut ()),
+            data: AtomicPtr::new(ptr::null_mut()),
             vtable: &STATIC_VTABLE,
         }
     }
@@ -77,6 +76,10 @@ impl Bytes {
     #[inline]
     pub const fn is_empty(&self) -> bool {
         self.len == 0
+    }
+
+    pub fn copy_from_slice(src: &[u8]) -> Bytes {
+        src.to_vec().into()
     }
 
     /// Retrieve the byte at the given index
@@ -371,7 +374,7 @@ impl From<&'static [u8]> for Bytes {
 // === Vtables ===
 // === Static vtable ===
 
-static STATIC_VTABLE: Vtable = Vtable {
+const STATIC_VTABLE: Vtable = Vtable {
     clone: static_clone,
     drop: static_drop,
 };
@@ -397,7 +400,7 @@ const KIND_UNSHARED: usize = 0x1;
 const KIND_SHARED: usize = 0x0;
 const KIND_MASK: usize = 0x1;
 
-static PROMOTABLE_ODD_VTABLE: Vtable = Vtable {
+const PROMOTABLE_ODD_VTABLE: Vtable = Vtable {
     clone: promotable_odd_clone,
     drop: promotable_odd_drop,
 };
@@ -427,7 +430,7 @@ unsafe fn promotable_odd_drop(data: &mut AtomicPtr<()>, ptr: *const u8, len: usi
     }
 }
 
-static PROMOTABLE_EVEN_VTABLE: Vtable = Vtable {
+const PROMOTABLE_EVEN_VTABLE: Vtable = Vtable {
     clone: promotable_even_clone,
     drop: promotable_even_drop,
 };
@@ -461,7 +464,7 @@ unsafe fn promotable_even_drop(data: &mut AtomicPtr<()>, ptr: *const u8, len: us
 
 // === Shared vtable ===
 
-static SHARED_VTABLE: Vtable = Vtable {
+const SHARED_VTABLE: Vtable = Vtable {
     clone: shared_clone,
     drop: shared_drop,
 };
