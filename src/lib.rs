@@ -5,6 +5,7 @@ extern crate std;
 
 mod buf;
 mod bytes;
+mod fmt;
 
 pub use crate::bytes::Bytes;
 
