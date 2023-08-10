@@ -1,3 +1,4 @@
+mod debug;
 mod hex;
 
 // No need to expose this struct
