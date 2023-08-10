@@ -1,4 +1,4 @@
-use core::str;
+use core::{fmt, ops, str};
 
 use crate::Bytes;
 
@@ -116,6 +116,34 @@ impl AsRef<str> for ByteStr {
     }
 }
 
+impl fmt::Debug for ByteStr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ByteStr")
+            .field("inner", &self.as_str())
+            .finish()
+    }
+}
+
+impl fmt::Display for ByteStr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl From<ByteStr> for Bytes {
+    fn from(value: ByteStr) -> Bytes {
+        value.inner
+    }
+}
+
+impl ops::Deref for ByteStr {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -132,5 +160,12 @@ mod test {
         let bytes = ByteStr::from(String::from("this is a string"));
 
         assert_eq!("this is a string", bytes.as_str());
+    }
+
+    #[test]
+    fn format() {
+        let bytes = ByteStr::from_static("this is a ByteStr");
+
+        assert_eq!("this is a ByteStr", format!("{}", bytes));
     }
 }

@@ -145,8 +145,8 @@ impl Bytes {
         let len = self.len;
 
         let start = match range.start_bound() {
-            Included(&start) => start + 1,
-            Excluded(&start) => start,
+            Included(&start) => start,
+            Excluded(&start) => start + 1,
             Unbounded => 0,
         };
         let end = match range.end_bound() {
@@ -603,6 +603,7 @@ mod test {
     #[test]
     fn static_bytes() {
         assert_iter!(b"this is a static bytes");
+        assert_iter!(b"another static bytes");
     }
 
     #[test]
@@ -634,5 +635,30 @@ mod test {
         assert_eq!(bytes.ptr, clone.ptr);
         assert_iter!(bytes => b"toto");
         assert_iter!(clone => b"toto");
+    }
+
+    #[test]
+    fn copy_from_slice() {
+        let bytes = Bytes::copy_from_slice(b"toto");
+
+        assert_iter!(bytes => b"toto");
+    }
+
+    #[test]
+    fn index() {
+        let bytes = Bytes::from_static(b"this is a very long long bytes slice");
+
+        assert_eq!(b"this", &bytes[..4]);
+        assert_eq!(b"very long long bytes", &bytes[10..30]);
+        assert_eq!(b"this is a very long long bytes slice", &bytes[..]);
+    }
+
+    #[test]
+    fn slice() {
+        let bytes = Bytes::from_static(b"this is a very long long bytes slice");
+
+        let slice = bytes.slice(10..30);
+
+        assert_eq!(b"very long long bytes", &slice[..]);
     }
 }

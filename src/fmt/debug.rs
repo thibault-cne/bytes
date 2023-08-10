@@ -66,6 +66,6 @@ mod test {
 
         let bytes = Bytes::from(vec);
 
-        assert_eq!(format!("{:?}", bytes), expected);
+        assert_eq!(expected, format!("{:?}", bytes));
     }
 }
