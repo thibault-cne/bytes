@@ -9,3 +9,8 @@ This crate is created as a utility tool for a web server. The idea is to create 
 ## Disclaimer
 
 This crate do not intend to replace any other crates, it is for educational purposes only.
+
+## TODO
+
+- [] Switch the in memory management from RC to Hazard Pointers (might
+  be more efficient)
