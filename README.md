@@ -12,5 +12,5 @@ This crate do not intend to replace any other crates, it is for educational purp
 
 ## TODO
 
-- [] Switch the in memory management from RC to Hazard Pointers (might
+- [ ] Switch the in memory management from RC to Hazard Pointers (might
   be more efficient)
