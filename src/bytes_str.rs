@@ -73,7 +73,7 @@ impl BytesStr {
     ///
     /// In debug mode this function will panic if the given bytes are invalid utf8. In release mode
     /// this will result in undefined behaviour.
-    pub unsafe fn from_shared_unsafe(src: Bytes) -> BytesStr {
+    pub unsafe fn from_shared_unchecked(src: Bytes) -> BytesStr {
         if cfg!(debug_assert) {
             match str::from_utf8(&src) {
                 Ok(_) => BytesStr { inner: src },
