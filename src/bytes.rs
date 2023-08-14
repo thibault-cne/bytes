@@ -243,6 +243,17 @@ impl Bytes {
         ret
     }
 
+    pub fn truncate(&mut self, len: usize) {
+        if len < self.len {
+            self.len = len
+        }
+    }
+
+    #[inline]
+    pub fn clear(&mut self) {
+        self.truncate(0)
+    }
+
     #[inline]
     unsafe fn inc_start(&mut self, inc: usize) {
         assert!(inc <= self.len());
