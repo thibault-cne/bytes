@@ -178,6 +178,79 @@ impl Bytes {
         slice
     }
 
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let mut bytes = Bytes::from(b"hello world" as &[u8]);
+    /// let b = bytes.split_off(5);
+    ///
+    /// assert_eq!(&bytes[..], b"hello");
+    /// assert_eq!(&b[..], b" world");
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if `at` > `self.len()`
+    pub fn split_off(&mut self, at: usize) -> Bytes {
+        assert!(
+            at <= self.len,
+            "index out of bounds: at ({}) > len ({})",
+            at,
+            self.len
+        );
+
+        let mut ret = self.clone();
+
+        self.len = at;
+
+        unsafe { ret.inc_start(at) };
+
+        ret
+    }
+
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let mut bytes = Bytes::from(b"hello world" as &[u8]);
+    /// let b = bytes.split_to(5);
+    ///
+    /// assert_eq!(&bytes[..], b" world");
+    /// assert_eq!(&b[..], b"hello");
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if `at` > `self.len()`
+    pub fn split_to(&mut self, at: usize) -> Bytes {
+        assert!(
+            at <= self.len,
+            "index out of bounds: at ({}) > len ({})",
+            at,
+            self.len
+        );
+
+        let mut ret = self.clone();
+
+        unsafe { self.inc_start(at) };
+
+        ret.len = at;
+        ret
+    }
+
+    #[inline]
+    unsafe fn inc_start(&mut self, inc: usize) {
+        assert!(inc <= self.len());
+
+        self.len -= inc;
+        self.ptr = self.ptr.add(inc)
+    }
+
     /// Retrive the inner bytes as a slice
     ///
     /// # Example
