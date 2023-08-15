@@ -8,136 +8,136 @@ use crate::Bytes;
 ///
 /// * The inner `Bytes` buffer is always made of valid utf8 bytes
 #[derive(Clone, Eq, PartialEq)]
-pub struct BytesStr {
+pub struct ByteStr {
     inner: Bytes,
 }
 
-impl BytesStr {
-    /// Create a new `BytesStr`
+impl ByteStr {
+    /// Create a new `ByteStr`
     ///
     /// # Invariant
     ///
     /// The inner buffer is empty so it's made of valid utf8
-    pub fn new() -> BytesStr {
-        BytesStr {
+    pub fn new() -> ByteStr {
+        ByteStr {
             inner: Bytes::new(),
         }
     }
 
-    /// Create a new `BytesStr` from a `&'static str`
+    /// Create a new `ByteStr` from a `&'static str`
     ///
     /// # Invariant
     ///
     /// Rust ensures that strings are made of valid utf8 so `src.as_bytes()` is made of valid utf8
     #[inline]
-    pub const fn from_static(src: &'static str) -> BytesStr {
-        BytesStr {
+    pub const fn from_static(src: &'static str) -> ByteStr {
+        ByteStr {
             inner: Bytes::from_static(src.as_bytes()),
         }
     }
 
-    /// Create a new `BytesStr` from an unchecked bytes slice
+    /// Create a new `ByteStr` from an unchecked bytes slice
     ///
     /// # Safety
     ///
-    /// This functions is unsafe because it requires valid utf8 bytes to ensure the `BytesStr`
+    /// This functions is unsafe because it requires valid utf8 bytes to ensure the `ByteStr`
     /// invariant.
     ///
     /// # Panics
     ///
     /// In debug mode this function will panic if the given bytes are invalid utf8. In release mode
     /// this will result in undefined behaviour.
-    pub unsafe fn from_utf8_unchecked(src: &[u8]) -> BytesStr {
+    pub unsafe fn from_utf8_unchecked(src: &[u8]) -> ByteStr {
         if cfg!(debug_assert) {
             match str::from_utf8(src) {
-                Ok(_) => BytesStr {
+                Ok(_) => ByteStr {
                     inner: Bytes::copy_from_slice(src),
                 },
                 Err(e) => panic!("invalid uft8: {}", e),
             }
         } else {
-            BytesStr {
+            ByteStr {
                 inner: Bytes::copy_from_slice(src),
             }
         }
     }
 
-    /// Create a new `BytesStr` from an unchecked `Bytes`
+    /// Create a new `ByteStr` from an unchecked `Bytes`
     ///
     /// # Safety
     ///
-    /// This functions is unsafe because it requires valid utf8 bytes to ensure the `BytesStr`
+    /// This functions is unsafe because it requires valid utf8 bytes to ensure the `ByteStr`
     /// invariant.
     ///
     /// # Panics
     ///
     /// In debug mode this function will panic if the given bytes are invalid utf8. In release mode
     /// this will result in undefined behaviour.
-    pub unsafe fn from_shared_unchecked(src: Bytes) -> BytesStr {
+    pub unsafe fn from_shared_unchecked(src: Bytes) -> ByteStr {
         if cfg!(debug_assert) {
             match str::from_utf8(&src) {
-                Ok(_) => BytesStr { inner: src },
+                Ok(_) => ByteStr { inner: src },
                 Err(e) => panic!("invalid utf8: {}", e),
             }
         } else {
-            BytesStr { inner: src }
+            ByteStr { inner: src }
         }
     }
 
     #[inline]
     pub fn as_str(&self) -> &str {
-        // Safety: the invariant of `BytesStr` ensures that inner is made of valid utf8
+        // Safety: the invariant of `ByteStr` ensures that inner is made of valid utf8
         unsafe { str::from_utf8_unchecked(&self.inner) }
     }
 }
 
-impl Default for BytesStr {
-    fn default() -> BytesStr {
-        BytesStr::new()
+impl Default for ByteStr {
+    fn default() -> ByteStr {
+        ByteStr::new()
     }
 }
 
-impl From<String> for BytesStr {
-    fn from(value: String) -> BytesStr {
+impl From<String> for ByteStr {
+    fn from(value: String) -> ByteStr {
         // Safety: Rust ensures that all string are made of valid utf8 bytes
-        unsafe { BytesStr::from_utf8_unchecked(value.as_bytes()) }
+        unsafe { ByteStr::from_utf8_unchecked(value.as_bytes()) }
     }
 }
 
-impl<'a> From<&'a str> for BytesStr {
-    fn from(value: &'a str) -> BytesStr {
+impl<'a> From<&'a str> for ByteStr {
+    fn from(value: &'a str) -> ByteStr {
         // Safety: Rust ensures that all string are made of valid utf8 bytes
-        unsafe { BytesStr::from_utf8_unchecked(value.as_bytes()) }
+        unsafe { ByteStr::from_utf8_unchecked(value.as_bytes()) }
     }
 }
 
-impl AsRef<str> for BytesStr {
+impl AsRef<str> for ByteStr {
     fn as_ref(&self) -> &str {
         self.as_str()
     }
 }
 
-impl fmt::Debug for BytesStr {
+impl fmt::Debug for ByteStr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("BytesStr")
+        f.debug_struct("ByteStr")
             .field("inner", &self.as_str())
             .finish()
     }
 }
 
-impl fmt::Display for BytesStr {
+impl fmt::Display for ByteStr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
     }
 }
 
-impl From<BytesStr> for Bytes {
-    fn from(value: BytesStr) -> Bytes {
+impl From<ByteStr> for Bytes {
+    fn from(value: ByteStr) -> Bytes {
         value.inner
     }
 }
 
-impl ops::Deref for BytesStr {
+impl ops::Deref for ByteStr {
     type Target = str;
 
     fn deref(&self) -> &Self::Target {
@@ -151,22 +151,22 @@ mod test {
 
     #[test]
     fn from_static() {
-        let bytes = BytesStr::from_static("this is valid utf8");
+        let bytes = ByteStr::from_static("this is valid utf8");
 
         assert_eq!("this is valid utf8", bytes.as_str());
     }
 
     #[test]
     fn from_string() {
-        let bytes = BytesStr::from(String::from("this is a string"));
+        let bytes = ByteStr::from(String::from("this is a string"));
 
         assert_eq!("this is a string", bytes.as_str());
     }
 
     #[test]
     fn format() {
-        let bytes = BytesStr::from_static("this is a BytesStr");
+        let bytes = ByteStr::from_static("this is a ByteStr");
 
-        assert_eq!("this is a BytesStr", format!("{}", bytes));
+        assert_eq!("this is a ByteStr", format!("{}", bytes));
     }
 }
