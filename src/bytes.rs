@@ -178,6 +178,9 @@ impl Bytes {
         slice
     }
 
+    /// Split the bytes into two at the given position. Afterwards, `self` contains elements from
+    /// `0` to `at` (i.e. `[0..at]`) and the returned value contains the elements from `at` to the
+    /// end (i.e. `[at..]`).
     ///
     /// # Example
     ///
@@ -211,6 +214,9 @@ impl Bytes {
         ret
     }
 
+    /// Split the bytes into two at the given position. Afterwards, `self` contains elements from
+    /// `at` to the end (i.e. `[at..]`) and the returned value contains the elements from `0` to `at`
+    /// (i.e. `[0..at]`).
     ///
     /// # Example
     ///
@@ -243,12 +249,37 @@ impl Bytes {
         ret
     }
 
+    /// Shorten the buffer to keep the first `len` bytes and dropping the rest. If `len` is greater
+    /// than the current len of the buffer, nothing is done.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let mut bytes = Bytes::from(b"hello world" as &[u8]);
+    /// bytes.truncate(5);
+    ///
+    /// assert_eq!(bytes, b"hello"[..]);
+    /// ```
     pub fn truncate(&mut self, len: usize) {
         if len < self.len {
             self.len = len
         }
     }
 
+    /// Clear the buffer by removing all data.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let mut bytes = Bytes::from(b"hello world" as &[u8]);
+    /// bytes.clear();
+    ///
+    /// assert!(bytes.is_empty());
+    /// ```
     #[inline]
     pub fn clear(&mut self) {
         self.truncate(0)
