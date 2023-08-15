@@ -776,4 +776,13 @@ mod test {
 
         assert_eq!(b"very long long bytes", &slice[..]);
     }
+
+    #[test]
+    fn clear() {
+        let vec: Vec<u8> = b"this is a boxed slice".to_vec();
+        let mut bytes = Bytes::from(vec.into_boxed_slice());
+        bytes.clear();
+
+        assert!(bytes.is_empty());
+    }
 }
