@@ -328,6 +328,13 @@ impl Default for Bytes {
     }
 }
 
+impl std::hash::Hash for Bytes {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        let b = self.as_slice();
+        b.hash(state);
+    }
+}
+
 // === AsRef, Borrow and Deref
 
 impl Deref for Bytes {
