@@ -386,6 +386,12 @@ impl PartialOrd<Bytes> for Bytes {
     }
 }
 
+impl Ord for Bytes {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.as_slice().cmp(other.as_slice())
+    }
+}
+
 impl Eq for Bytes {}
 
 // ** [u8] **
@@ -435,6 +441,56 @@ impl<'a> PartialEq<Bytes> for &'a [u8] {
 impl<'a> PartialOrd<Bytes> for &'a [u8] {
     fn partial_cmp(&self, other: &Bytes) -> Option<std::cmp::Ordering> {
         (*self).partial_cmp(other.as_slice())
+    }
+}
+
+// ** str **
+
+impl PartialEq<str> for Bytes {
+    fn eq(&self, other: &str) -> bool {
+        self.as_slice() == other.as_bytes()
+    }
+}
+
+impl PartialOrd<str> for Bytes {
+    fn partial_cmp(&self, other: &str) -> Option<std::cmp::Ordering> {
+        self.as_slice().partial_cmp(other.as_bytes())
+    }
+}
+
+impl<'a> PartialEq<&'a str> for Bytes {
+    fn eq(&self, other: &&'a str) -> bool {
+        self.as_slice() == other.as_bytes()
+    }
+}
+
+impl<'a> PartialOrd<&'a str> for Bytes {
+    fn partial_cmp(&self, other: &&'a str) -> Option<std::cmp::Ordering> {
+        self.as_slice().partial_cmp(other.as_bytes())
+    }
+}
+
+impl PartialEq<Bytes> for str {
+    fn eq(&self, other: &Bytes) -> bool {
+        self.as_bytes() == other.as_slice()
+    }
+}
+
+impl PartialOrd<Bytes> for str {
+    fn partial_cmp(&self, other: &Bytes) -> Option<std::cmp::Ordering> {
+        self.as_bytes().partial_cmp(other.as_slice())
+    }
+}
+
+impl<'a> PartialEq<Bytes> for &'a str {
+    fn eq(&self, other: &Bytes) -> bool {
+        self.as_bytes() == other.as_slice()
+    }
+}
+
+impl<'a> PartialOrd<Bytes> for &'a str {
+    fn partial_cmp(&self, other: &Bytes) -> Option<std::cmp::Ordering> {
+        self.as_bytes().partial_cmp(other.as_slice())
     }
 }
 
