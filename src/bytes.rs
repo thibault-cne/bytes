@@ -335,6 +335,10 @@ impl std::hash::Hash for Bytes {
     }
 }
 
+unsafe impl Send for Bytes {}
+
+unsafe impl Sync for Bytes {}
+
 // === AsRef, Borrow and Deref
 
 impl Deref for Bytes {
@@ -398,6 +402,18 @@ impl PartialOrd<[u8]> for Bytes {
     }
 }
 
+impl<'a> PartialEq<&'a [u8]> for Bytes {
+    fn eq(&self, other: &&'a [u8]) -> bool {
+        self.as_slice() == *other
+    }
+}
+
+impl<'a> PartialOrd<&'a [u8]> for Bytes {
+    fn partial_cmp(&self, other: &&'a [u8]) -> Option<std::cmp::Ordering> {
+        self.as_slice().partial_cmp(*other)
+    }
+}
+
 impl PartialEq<Bytes> for [u8] {
     fn eq(&self, other: &Bytes) -> bool {
         self == other.as_slice()
@@ -407,6 +423,18 @@ impl PartialEq<Bytes> for [u8] {
 impl PartialOrd<Bytes> for [u8] {
     fn partial_cmp(&self, other: &Bytes) -> Option<std::cmp::Ordering> {
         self.partial_cmp(other.as_slice())
+    }
+}
+
+impl<'a> PartialEq<Bytes> for &'a [u8] {
+    fn eq(&self, other: &Bytes) -> bool {
+        *self == other.as_slice()
+    }
+}
+
+impl<'a> PartialOrd<Bytes> for &'a [u8] {
+    fn partial_cmp(&self, other: &Bytes) -> Option<std::cmp::Ordering> {
+        (*self).partial_cmp(other.as_slice())
     }
 }
 
