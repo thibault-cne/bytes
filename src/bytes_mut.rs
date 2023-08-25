@@ -178,7 +178,7 @@ impl BytesMut {
             unsafe { alloc(layout) }
         } else {
             let old_layout = Layout::array::<u8>(self.cap).unwrap();
-            let old_ptr = self.ptr.as_ptr() as *mut u8;
+            let old_ptr = self.ptr.as_ptr();
 
             unsafe { realloc(old_ptr, old_layout, layout.size()) }
         };
@@ -205,11 +205,11 @@ impl BytesMut {
             unsafe { alloc(layout) }
         } else {
             let old_layout = Layout::array::<u8>(self.cap).unwrap();
-            let old_ptr = self.ptr.as_ptr() as *mut u8;
+            let old_ptr = self.ptr.as_ptr();
             unsafe { realloc(old_ptr, old_layout, layout.size()) }
         };
 
-        self.ptr = match NonNull::new(ptr as *mut u8) {
+        self.ptr = match NonNull::new(ptr) {
             Some(ptr) => ptr,
             None => handle_alloc_error(layout),
         };
