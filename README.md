@@ -14,6 +14,6 @@ This crate do not intend to replace any other crates, it is for educational purp
 
 - [ ] Switch the in memory management from RC to Hazard Pointers (might
   be more efficient)
-- [ ] Add a `BytesMut` struct to create `Bytes` with a mutable buffer
+- [x] Add a `BytesMut` struct to create `Bytes` with a mutable buffer
   (actually done with a vec but a self implementation might be more
   efficient)
