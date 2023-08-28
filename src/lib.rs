@@ -15,3 +15,5 @@ pub use crate::bytes::Bytes;
 pub use crate::bytes_mut::BytesMut;
 
 pub use crate::buf::{Buf, BufMut};
+
+pub use crate::iter::BytesIter;
