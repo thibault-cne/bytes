@@ -2,8 +2,9 @@ use crate::Bytes;
 
 /// # Invariant
 ///
-/// `self.ptr` is always a valid pointer to a slice of bytes of len at least
+/// * `self.ptr` is always a valid pointer to a slice of bytes of len at least
 /// `self.len`.
+/// * `self.pos < self.len`
 pub struct BytesIter {
     ptr: *const u8,
     len: usize,
@@ -117,12 +118,93 @@ impl BytesIter {
             None
         }
     }
+
+    /// Take the next bytes from `self.pos` to `self.pos + n`.
+    /// If `self.pos + n >= self.len` then `Option::None` is returned.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let b = Bytes::from_static(b"a bytes slice");
+    /// let mut iter = b.into_iter();
+    ///
+    /// assert_eq!(iter.next_n(7), Some(&b"a bytes"[..]));
+    /// assert_eq!(iter.next(), Some(b' '));
+    /// ```
+    #[inline]
+    pub fn next_n(&mut self, n: usize) -> Option<&[u8]> {
+        let end = self.pos + n;
+
+        if end < self.len {
+            let b = Some(&self._b[self.pos..end]);
+            self.pos += n;
+            b
+        } else {
+            None
+        }
+    }
+
+    /// Advance the position cursor of `n`.
+    ///
+    /// # Safety
+    ///
+    /// You must ensures that `self.pos + n < self.len` in order to keep `Self`
+    /// invariant.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let b = Bytes::from_static(b"a bytes slice");
+    /// let mut iter = b.into_iter();
+    ///
+    /// unsafe { iter.advance(6) };
+    /// assert_eq!(iter.next(), Some(b's'));
+    /// ```
+    #[inline]
+    pub unsafe fn advance(&mut self, n: usize) {
+        debug_assert!(
+            self.pos + n < self.len,
+            "position out of bounds, self.pos ({}) >= self.len ({})",
+            self.pos + n,
+            self.len
+        );
+        self.pos += n;
+    }
+
+    /// Advance the position cursor of 1. This is strictly equivalent to
+    /// `advance(1)`.
+    ///
+    /// # Safety
+    ///
+    /// You must ensures that `self.pos + 1 < self.len` in order to keep `Self`
+    /// invariant.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bytes::Bytes;
+    ///
+    /// let b = Bytes::from_static(b"a bytes slice");
+    /// let mut iter = b.into_iter();
+    ///
+    /// unsafe { iter.bump() };
+    /// assert_eq!(iter.next(), Some(b' '));
+    /// ```
+    #[inline]
+    pub unsafe fn bump(&mut self) {
+        self.advance(1)
+    }
 }
 
 impl IntoIterator for Bytes {
     type Item = u8;
     type IntoIter = BytesIter;
 
+    #[inline]
     fn into_iter(self) -> BytesIter {
         BytesIter::new(self)
     }
@@ -131,6 +213,7 @@ impl IntoIterator for Bytes {
 impl Iterator for BytesIter {
     type Item = u8;
 
+    #[inline]
     fn next(&mut self) -> Option<u8> {
         if self.pos < self.len {
             // SAFETY:
