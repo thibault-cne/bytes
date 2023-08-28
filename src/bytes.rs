@@ -78,6 +78,18 @@ impl Bytes {
         self.len == 0
     }
 
+    /// Get the raw pointer of the inner bytes array
+    ///
+    /// # Safety
+    ///
+    /// You must ensures that the `self` value is not dropped between the time
+    /// you retrieve the `self.ptr` and the time you use it. Otherwise it's
+    /// undefined behaviour.
+    #[inline]
+    pub(crate) unsafe fn ptr(&self) -> *const u8 {
+        self.ptr
+    }
+
     pub fn copy_from_slice(src: &[u8]) -> Bytes {
         src.to_vec().into()
     }
